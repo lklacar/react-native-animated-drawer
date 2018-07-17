@@ -37,9 +37,6 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
 
     private panResponder: PanResponderInstance;
     private animatedValueX: number;
-    private shouldCapture: boolean = true;
-    private shouldTrigger: boolean = false;
-    private animationInProgess: boolean = false;
 
     get sidebarWidth(): number {
         return this.props.sidebarWidth ? this.props.sidebarWidth : width - 50;
@@ -73,33 +70,32 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
         });
 
         this.panResponder = PanResponder.create({
-            onStartShouldSetPanResponder: () => this.shouldCapture,
-            onStartShouldSetPanResponderCapture: () => this.shouldCapture,
-            onMoveShouldSetPanResponder: () => this.shouldCapture,
-            onMoveShouldSetPanResponderCapture: () => this.shouldCapture,
+            onStartShouldSetPanResponder: (evt: GestureResponderEvent) => {
+                if (this.props.isOpen) {
+                    return true;
+                } else {
+                    return evt.nativeEvent.locationX < this.triggerArea;
+                }
+            },
+            onStartShouldSetPanResponderCapture: () => false,
+            onMoveShouldSetPanResponder: () => false,
+            onMoveShouldSetPanResponderCapture: () => false,
+            onPanResponderTerminationRequest: () => false,
+            onPanResponderTerminate: () => false,
+            onShouldBlockNativeResponder: () => false,
 
-            onPanResponderGrant: (evt: GestureResponderEvent) => {
-                this.shouldTrigger = (evt.nativeEvent.locationX < this.triggerArea) || !this.animationInProgess;
-
+            onPanResponderGrant: () => {
                 this.state.pan.setOffset(this.animatedValueX);
                 this.state.pan.setValue(0);
             },
-            onPanResponderMove: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-                if (!this.props.isOpen && !this.shouldTrigger) {
-                    return
-                }
 
+            onPanResponderMove: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => {
                 return Animated.event([null, {
                     dx: this.state.pan,
                 }])(evt, gestureState)
             },
-            onPanResponderTerminationRequest: () => true,
-            onPanResponderRelease: (evt, gestureState) => {
-                this.shouldTrigger = (evt.nativeEvent.locationX < this.triggerArea) || !this.animationInProgess;
-                if (!this.props.isOpen && !this.shouldTrigger) {
-                    return;
-                }
 
+            onPanResponderRelease: (evt, gestureState) => {
                 if (gestureState.dx > this.triggerThreshold) {
                     this.props.shouldOpen();
                 } else if (gestureState.dx < -this.triggerThreshold) {
@@ -116,29 +112,22 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
                     }
                 }
             },
-            onPanResponderTerminate: () => {
-                return true;
-            },
-            onShouldBlockNativeResponder: () => {
-                return true;
-            },
+
+
         });
     }
 
-
     open() {
-        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
             toValue: this.sidebarWidth
-        }).start(() => this.animationInProgess = false);
+        }).start();
 
     }
 
     close() {
-        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
             toValue: -this.sidebarWidth
-        }).start(() => this.animationInProgess = false);
+        }).start();
     }
 
     componentWillUnmount() {

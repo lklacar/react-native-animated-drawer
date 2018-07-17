@@ -2,11 +2,20 @@ import * as React from "react";
 import { Animated, Dimensions, PanResponder, View } from "react-native";
 const { width } = Dimensions.get('window');
 export default class AnimatedDrawer extends React.Component {
+    get sidebarWidth() {
+        return this.props.sidebarWidth ? this.props.sidebarWidth : width - 50;
+    }
+    get triggerThreshold() {
+        return this.props.triggerThreshold ? this.props.triggerThreshold : 50;
+    }
+    get triggerArea() {
+        return this.props.triggerArea ? this.props.triggerArea : 100;
+    }
+    get mode() {
+        return this.props.mode ? this.props.mode : "overlay";
+    }
     constructor(props) {
         super(props);
-        this.shouldCapture = true;
-        this.shouldTrigger = false;
-        this.animationInProgess = false;
         this.state = {
             pan: new Animated.Value(0),
             open: this.open.bind(this),
@@ -17,29 +26,30 @@ export default class AnimatedDrawer extends React.Component {
             return this.animatedValueX = Math.max(0, Math.min(value, this.sidebarWidth));
         });
         this.panResponder = PanResponder.create({
-            onStartShouldSetPanResponder: () => this.shouldCapture,
-            onStartShouldSetPanResponderCapture: () => this.shouldCapture,
-            onMoveShouldSetPanResponder: () => this.shouldCapture,
-            onMoveShouldSetPanResponderCapture: () => this.shouldCapture,
-            onPanResponderGrant: (evt) => {
-                this.shouldTrigger = (evt.nativeEvent.locationX < this.triggerArea) || !this.animationInProgess;
+            onStartShouldSetPanResponder: (evt) => {
+                if (this.props.isOpen) {
+                    return true;
+                }
+                else {
+                    return evt.nativeEvent.locationX < this.triggerArea;
+                }
+            },
+            onStartShouldSetPanResponderCapture: () => false,
+            onMoveShouldSetPanResponder: () => false,
+            onMoveShouldSetPanResponderCapture: () => false,
+            onPanResponderTerminationRequest: () => false,
+            onPanResponderTerminate: () => false,
+            onShouldBlockNativeResponder: () => false,
+            onPanResponderGrant: () => {
                 this.state.pan.setOffset(this.animatedValueX);
                 this.state.pan.setValue(0);
             },
             onPanResponderMove: (evt, gestureState) => {
-                if (!this.props.isOpen && !this.shouldTrigger) {
-                    return;
-                }
                 return Animated.event([null, {
                         dx: this.state.pan,
                     }])(evt, gestureState);
             },
-            onPanResponderTerminationRequest: () => true,
             onPanResponderRelease: (evt, gestureState) => {
-                this.shouldTrigger = (evt.nativeEvent.locationX < this.triggerArea) || !this.animationInProgess;
-                if (!this.props.isOpen && !this.shouldTrigger) {
-                    return;
-                }
                 if (gestureState.dx > this.triggerThreshold) {
                     this.props.shouldOpen();
                 }
@@ -58,37 +68,17 @@ export default class AnimatedDrawer extends React.Component {
                     }
                 }
             },
-            onPanResponderTerminate: () => {
-                return true;
-            },
-            onShouldBlockNativeResponder: () => {
-                return true;
-            },
         });
     }
-    get sidebarWidth() {
-        return this.props.sidebarWidth ? this.props.sidebarWidth : width - 50;
-    }
-    get triggerThreshold() {
-        return this.props.triggerThreshold ? this.props.triggerThreshold : 50;
-    }
-    get triggerArea() {
-        return this.props.triggerArea ? this.props.triggerArea : 100;
-    }
-    get mode() {
-        return this.props.mode ? this.props.mode : "overlay";
-    }
     open() {
-        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
             toValue: this.sidebarWidth
-        }).start(() => this.animationInProgess = false);
+        }).start();
     }
     close() {
-        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
             toValue: -this.sidebarWidth
-        }).start(() => this.animationInProgess = false);
+        }).start();
     }
     componentWillUnmount() {
         this.state.pan.removeAllListeners();

@@ -21,9 +21,6 @@ interface Props {
 export default class AnimatedDrawer extends React.Component<Props, State> {
     private panResponder;
     private animatedValueX;
-    private shouldCapture;
-    private shouldTrigger;
-    private animationInProgess;
     readonly sidebarWidth: number;
     readonly triggerThreshold: number;
     readonly triggerArea: number;

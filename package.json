@@ -1,0 +1,35 @@
+{
+  "name": "react-native-animated-drawer",
+  "version": "1.0.0",
+  "description": "React native animated drawer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --project tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lklacar/react-native-animated-drawer.git"
+  },
+  "keywords": [
+    "react",
+    "native",
+    "animated",
+    "drawer"
+  ],
+  "author": "Luka Klacar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lklacar/react-native-animated-drawer/issues"
+  },
+  "homepage": "https://github.com/lklacar/react-native-animated-drawer#readme",
+  "devDependencies": {
+    "@types/react": "^16.4.6",
+    "@types/react-native": "^0.56.2",
+    "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "react": "^16.4.1",
+    "react-native": "^0.56.0"
+  }
+}

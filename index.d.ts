@@ -16,6 +16,7 @@ interface Props {
     sidebarWidth?: number;
     triggerThreshold?: number;
     triggerArea?: number;
+    mode?: "overlay" | "slide";
 }
 export default class AnimatedDrawer extends React.Component<Props, State> {
     private panResponder;
@@ -26,6 +27,7 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
     readonly sidebarWidth: number;
     readonly triggerThreshold: number;
     readonly triggerArea: number;
+    readonly mode: string;
     constructor(props: any);
     open(): void;
     close(): void;

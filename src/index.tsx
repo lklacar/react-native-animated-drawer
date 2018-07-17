@@ -27,6 +27,8 @@ interface Props {
     sidebarWidth?: number,
     triggerThreshold?: number,
     triggerArea?: number;
+
+    mode?: "overlay" | "slide",
 }
 
 const {width} = Dimensions.get('window');
@@ -49,6 +51,10 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
 
     get triggerArea(): number {
         return this.props.triggerArea ? this.props.triggerArea : 100;
+    }
+
+    get mode(): string {
+        return this.props.mode ? this.props.mode : "overlay";
     }
 
     constructor(props: any) {
@@ -150,23 +156,27 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
     }
 
     render(): React.ReactNode {
-        const maxX = width - 50;
+        const maxX = this.sidebarWidth;
         const constrainedX = this.state.pan.interpolate({
-            inputRange: [0, maxX, Infinity],
-            outputRange: [0, maxX, maxX]
+            inputRange: [0, 0, maxX, Infinity],
+            outputRange: [0, 0, maxX, maxX]
         });
 
         return <View {...this.panResponder.panHandlers} style={{flex: 1, backgroundColor: 'transparent'}}>
-            <View style={{
+            <Animated.View style={[{
                 position: 'absolute',
-            }}>
+            }, this.mode === "slide" ? {
+                transform: [{
+                    translateX: constrainedX
+                }]
+            } : {}]}>
                 {this.props.content}
-            </View>
+            </Animated.View>
 
             <Animated.View
                 style={{
-                    width: width - 50,
-                    left: -width + 50,
+                    width: this.sidebarWidth,
+                    left: -this.sidebarWidth,
                     flex: 1,
                     transform: [{
                         translateX: constrainedX

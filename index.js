@@ -75,6 +75,9 @@ export default class AnimatedDrawer extends React.Component {
     get triggerArea() {
         return this.props.triggerArea ? this.props.triggerArea : 100;
     }
+    get mode() {
+        return this.props.mode ? this.props.mode : "overlay";
+    }
     open() {
         this.animationInProgess = true;
         Animated.timing(this.state.pan, {
@@ -100,18 +103,22 @@ export default class AnimatedDrawer extends React.Component {
         return prevState;
     }
     render() {
-        const maxX = width - 50;
+        const maxX = this.sidebarWidth;
         const constrainedX = this.state.pan.interpolate({
-            inputRange: [0, maxX, Infinity],
-            outputRange: [0, maxX, maxX]
+            inputRange: [0, 0, maxX, Infinity],
+            outputRange: [0, 0, maxX, maxX]
         });
         return React.createElement(View, Object.assign({}, this.panResponder.panHandlers, { style: { flex: 1, backgroundColor: 'transparent' } }),
-            React.createElement(View, { style: {
-                    position: 'absolute',
-                } }, this.props.content),
+            React.createElement(Animated.View, { style: [{
+                        position: 'absolute',
+                    }, this.mode === "slide" ? {
+                        transform: [{
+                                translateX: constrainedX
+                            }]
+                    } : {}] }, this.props.content),
             React.createElement(Animated.View, { style: {
-                    width: width - 50,
-                    left: -width + 50,
+                    width: this.sidebarWidth,
+                    left: -this.sidebarWidth,
                     flex: 1,
                     transform: [{
                             translateX: constrainedX

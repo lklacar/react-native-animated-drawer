@@ -28,6 +28,7 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
     constructor(props: any);
     open(): void;
     close(): void;
+    componentWillReceiveProps(nextProps: Props): void;
     componentWillUnmount(): void;
     static getDerivedStateFromProps(nextProps: Props, prevState: State): State;
     render(): React.ReactNode;

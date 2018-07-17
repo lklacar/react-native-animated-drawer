@@ -13,14 +13,19 @@ interface Props {
     isOpen: boolean;
     shouldOpen: () => any;
     shouldClose: () => any;
+    sidebarWidth?: number;
+    triggerThreshold?: number;
+    triggerArea?: number;
 }
 export default class AnimatedDrawer extends React.Component<Props, State> {
     private panResponder;
     private animatedValueX;
     private shouldCapture;
-    private threshold;
-    private limit;
     private shouldTrigger;
+    private animationInProgess;
+    readonly sidebarWidth: number;
+    readonly triggerThreshold: number;
+    readonly triggerArea: number;
     constructor(props: any);
     open(): void;
     close(): void;

@@ -5,9 +5,8 @@ export default class AnimatedDrawer extends React.Component {
     constructor(props) {
         super(props);
         this.shouldCapture = true;
-        this.threshold = 50;
-        this.limit = width - 50;
         this.shouldTrigger = false;
+        this.animationInProgess = false;
         this.state = {
             pan: new Animated.Value(0),
             open: this.open.bind(this),
@@ -15,7 +14,7 @@ export default class AnimatedDrawer extends React.Component {
         };
         this.animatedValueX = 0;
         this.state.pan.addListener(({ value }) => {
-            return this.animatedValueX = Math.max(0, Math.min(value, this.limit));
+            return this.animatedValueX = Math.max(0, Math.min(value, this.sidebarWidth));
         });
         this.panResponder = PanResponder.create({
             onStartShouldSetPanResponder: () => this.shouldCapture,
@@ -23,12 +22,7 @@ export default class AnimatedDrawer extends React.Component {
             onMoveShouldSetPanResponder: () => this.shouldCapture,
             onMoveShouldSetPanResponderCapture: () => this.shouldCapture,
             onPanResponderGrant: (evt) => {
-                if (evt.nativeEvent.locationX < 100) {
-                    this.shouldTrigger = true;
-                }
-                else {
-                    this.shouldTrigger = false;
-                }
+                this.shouldTrigger = (evt.nativeEvent.locationX < 100) || !this.animationInProgess;
                 this.state.pan.setOffset(this.animatedValueX);
                 this.state.pan.setValue(0);
             },
@@ -45,16 +39,16 @@ export default class AnimatedDrawer extends React.Component {
                 if (!this.props.isOpen && !this.shouldTrigger) {
                     return;
                 }
-                if (gestureState.dx > this.threshold) {
+                if (gestureState.dx > this.triggerThreshold) {
                     this.props.shouldOpen();
                 }
-                else if (gestureState.dx < -this.threshold) {
+                else if (gestureState.dx < -this.triggerThreshold) {
                     this.props.shouldClose();
                 }
                 else {
                     this.state.pan.flattenOffset();
                     const distanceFromStart = this.animatedValueX;
-                    const distanceFromEnd = this.limit - this.animatedValueX;
+                    const distanceFromEnd = this.sidebarWidth - this.animatedValueX;
                     if (distanceFromStart > distanceFromEnd) {
                         this.props.shouldOpen();
                     }
@@ -71,15 +65,26 @@ export default class AnimatedDrawer extends React.Component {
             },
         });
     }
+    get sidebarWidth() {
+        return this.props.sidebarWidth ? this.props.sidebarWidth : width - 50;
+    }
+    get triggerThreshold() {
+        return this.props.triggerThreshold ? this.props.triggerThreshold : 50;
+    }
+    get triggerArea() {
+        return this.props.triggerArea ? this.props.triggerArea : 100;
+    }
     open() {
+        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
-            toValue: this.limit
-        }).start();
+            toValue: this.sidebarWidth
+        }).start(() => this.animationInProgess = false);
     }
     close() {
+        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
-            toValue: -this.limit
-        }).start();
+            toValue: -this.sidebarWidth
+        }).start(() => this.animationInProgess = false);
     }
     componentWillUnmount() {
         this.state.pan.removeAllListeners();
@@ -100,7 +105,9 @@ export default class AnimatedDrawer extends React.Component {
             outputRange: [0, maxX, maxX]
         });
         return React.createElement(View, Object.assign({}, this.panResponder.panHandlers, { style: { flex: 1, backgroundColor: 'transparent' } }),
-            React.createElement(View, { style: { position: 'absolute' } }, this.props.content),
+            React.createElement(View, { style: {
+                    position: 'absolute',
+                } }, this.props.content),
             React.createElement(Animated.View, { style: {
                     width: width - 50,
                     left: -width + 50,

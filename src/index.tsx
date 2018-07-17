@@ -23,6 +23,10 @@ interface Props {
     isOpen: boolean,
     shouldOpen: () => any,
     shouldClose: () => any,
+
+    sidebarWidth?: number,
+    triggerThreshold?: number,
+    triggerArea?: number;
 }
 
 const {width} = Dimensions.get('window');
@@ -32,9 +36,20 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
     private panResponder: PanResponderInstance;
     private animatedValueX: number;
     private shouldCapture: boolean = true;
-    private threshold: number = 50;
-    private limit: number = width - 50;
     private shouldTrigger: boolean = false;
+    private animationInProgess: boolean = false;
+
+    get sidebarWidth(): number {
+        return this.props.sidebarWidth ? this.props.sidebarWidth : width - 50;
+    }
+
+    get triggerThreshold(): number {
+        return this.props.triggerThreshold ? this.props.triggerThreshold : 50;
+    }
+
+    get triggerArea(): number {
+        return this.props.triggerArea ? this.props.triggerArea : 100;
+    }
 
     constructor(props: any) {
         super(props);
@@ -48,7 +63,7 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
 
         this.animatedValueX = 0;
         this.state.pan.addListener(({value}) => {
-            return this.animatedValueX = Math.max(0, Math.min(value, this.limit));
+            return this.animatedValueX = Math.max(0, Math.min(value, this.sidebarWidth));
         });
 
         this.panResponder = PanResponder.create({
@@ -58,11 +73,7 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
             onMoveShouldSetPanResponderCapture: () => this.shouldCapture,
 
             onPanResponderGrant: (evt: GestureResponderEvent) => {
-                if (evt.nativeEvent.locationX < 100) {
-                    this.shouldTrigger = true;
-                } else {
-                    this.shouldTrigger = false;
-                }
+                this.shouldTrigger = (evt.nativeEvent.locationX < 100) || !this.animationInProgess;
 
                 this.state.pan.setOffset(this.animatedValueX);
                 this.state.pan.setValue(0);
@@ -82,14 +93,14 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
                     return;
                 }
 
-                if (gestureState.dx > this.threshold) {
+                if (gestureState.dx > this.triggerThreshold) {
                     this.props.shouldOpen();
-                } else if (gestureState.dx < -this.threshold) {
+                } else if (gestureState.dx < -this.triggerThreshold) {
                     this.props.shouldClose();
                 } else {
                     this.state.pan.flattenOffset();
                     const distanceFromStart = this.animatedValueX;
-                    const distanceFromEnd = this.limit - this.animatedValueX;
+                    const distanceFromEnd = this.sidebarWidth - this.animatedValueX;
 
                     if (distanceFromStart > distanceFromEnd) {
                         this.props.shouldOpen();
@@ -109,16 +120,18 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
 
 
     open() {
+        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
-            toValue: this.limit
-        }).start();
+            toValue: this.sidebarWidth
+        }).start(() => this.animationInProgess = false);
 
     }
 
     close() {
+        this.animationInProgess = true;
         Animated.timing(this.state.pan, {
-            toValue: -this.limit
-        }).start();
+            toValue: -this.sidebarWidth
+        }).start(() => this.animationInProgess = false);
     }
 
     componentWillUnmount() {
@@ -143,7 +156,9 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
         });
 
         return <View {...this.panResponder.panHandlers} style={{flex: 1, backgroundColor: 'transparent'}}>
-            <View style={{position: 'absolute'}}>
+            <View style={{
+                position: 'absolute',
+            }}>
                 {this.props.content}
             </View>
 

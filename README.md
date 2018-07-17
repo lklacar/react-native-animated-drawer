@@ -1,5 +1,9 @@
 # React native animated drawer
 
+React native drawer using react native Animated.
+
+This package currently contains a bare minimum. Feel free to add features and make pull requests. 
+
 Usage:
 ```javascript 
 import * as React from "react";

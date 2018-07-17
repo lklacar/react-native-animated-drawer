@@ -22,7 +22,7 @@ export default class AnimatedDrawer extends React.Component {
             onMoveShouldSetPanResponder: () => this.shouldCapture,
             onMoveShouldSetPanResponderCapture: () => this.shouldCapture,
             onPanResponderGrant: (evt) => {
-                this.shouldTrigger = (evt.nativeEvent.locationX < 100) || !this.animationInProgess;
+                this.shouldTrigger = (evt.nativeEvent.locationX < this.triggerArea) || !this.animationInProgess;
                 this.state.pan.setOffset(this.animatedValueX);
                 this.state.pan.setValue(0);
             },
@@ -36,6 +36,7 @@ export default class AnimatedDrawer extends React.Component {
             },
             onPanResponderTerminationRequest: () => true,
             onPanResponderRelease: (evt, gestureState) => {
+                this.shouldTrigger = (evt.nativeEvent.locationX < this.triggerArea) || !this.animationInProgess;
                 if (!this.props.isOpen && !this.shouldTrigger) {
                     return;
                 }

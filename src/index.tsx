@@ -130,14 +130,13 @@ export default class AnimatedDrawer extends React.Component<Props, State> {
         }).start();
     }
 
-    componentWillReceiveProps(nextProps: Props) {
-        if (nextProps.isOpen) {
-            this.open();
-        } else {
-            this.close();
-        }
-    }
-
+    // componentWillReceiveProps(nextProps: Props) {
+    //     if (nextProps.isOpen) {
+    //         this.open();
+    //     } else {
+    //         this.close();
+    //     }
+    // }
 
     componentWillUnmount() {
         this.state.pan.removeAllListeners();

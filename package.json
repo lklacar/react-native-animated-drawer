@@ -1,6 +1,6 @@
 {
   "name": "react-native-animated-drawer",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "React native animated drawer",
   "main": "index.js",
   "scripts": {
@@ -26,10 +26,9 @@
   "devDependencies": {
     "@types/react": "^16.4.6",
     "@types/react-native": "^0.56.2",
-    "typescript": "^2.9.2",
     "react": "^16.4.1",
-    "react-native": "^0.56.0"
+    "react-native": "^0.56.0",
+    "typescript": "^2.9.2"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
